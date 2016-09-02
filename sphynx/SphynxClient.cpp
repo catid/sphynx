@@ -3,6 +3,7 @@
 SphynxClient::SphynxClient()
 {
     ServerTimeDeltaMsec = 0;
+    SendingHandshakes = false;
 
     RPCHeartbeatTCP.CallSender = TCPCallSender;
     RPCHeartbeatUDP.CallSender = UDPCallSender;
