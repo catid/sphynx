@@ -17,6 +17,8 @@
     #endif
 
     #include <windows.h>
+#else
+    #include <pthread.h>
 #endif
 
 #ifdef DID_DEFINE_WINSOCKAPI
@@ -220,3 +222,137 @@ public:
 #endif
 
 #define ALIGNED_TYPE(t,x) typedef t CAT_ALIGNED(x)
+
+
+//-----------------------------------------------------------------------------
+// Read/Write Lock
+
+class RWLock
+{
+public:
+    RWLock()
+    {
+#ifdef _WIN32
+        ::InitializeSRWLock(&PrimitiveLock);
+#else
+        pthread_rwlock_init(&PrimitiveLock, nullptr);
+#endif
+    }
+    ~RWLock()
+    {
+#ifndef _WIN32
+        pthread_rwlock_destroy(&PrimitiveLock);
+#endif
+    }
+
+protected:
+    friend class ReadLocker;
+    friend class WriteLocker;
+#ifdef _WIN32
+    SRWLOCK PrimitiveLock = SRWLOCK_INIT;
+#else
+    pthread_rwlock_t PrimitiveLock = PTHREAD_RWLOCK_INITIALIZER;
+#endif
+};
+
+class ReadLocker
+{
+public:
+    ReadLocker() {}
+    ReadLocker(RWLock& lock)
+    {
+        Set(lock);
+    }
+    ~ReadLocker()
+    {
+        Clear();
+    }
+    void Set(RWLock& lock)
+    {
+        Clear();
+        Lock = &lock;
+#ifdef _WIN32
+        ::AcquireSRWLockShared(&lock.PrimitiveLock);
+#else
+        pthread_rwlock_rdlock(&lock.PrimitiveLock);
+#endif
+    }
+    bool TrySet(RWLock& lock)
+    {
+        Clear();
+#ifdef _WIN32
+        if (::TryAcquireSRWLockShared(&lock.PrimitiveLock) != 0)
+#else
+        if (pthread_rwlock_tryrdlock(&lock.PrimitiveLock) == 0)
+#endif
+        {
+            Lock = &lock;
+            return true;
+        }
+        return false;
+    }
+    void Clear()
+    {
+        if (Lock)
+#ifdef _WIN32
+            ::ReleaseSRWLockShared(&Lock->PrimitiveLock);
+#else
+            pthread_rwlock_unlock(&Lock->PrimitiveLock);
+#endif
+        Lock = nullptr;
+    }
+
+protected:
+    RWLock* Lock = nullptr;
+};
+
+class WriteLocker
+{
+public:
+    WriteLocker() {}
+    WriteLocker(RWLock& lock)
+    {
+        Set(lock);
+    }
+    ~WriteLocker()
+    {
+        Clear();
+    }
+    void Set(RWLock& lock)
+    {
+        Clear();
+        Lock = &lock;
+#ifdef _WIN32
+        ::AcquireSRWLockExclusive(&lock.PrimitiveLock);
+#else
+        pthread_rwlock_wrlock(&lock.PrimitiveLock);
+#endif
+    }
+    bool TrySet(RWLock& lock)
+    {
+        Clear();
+#ifdef _WIN32
+        if (::TryAcquireSRWLockExclusive(&lock.PrimitiveLock) != 0)
+#else
+        if (pthread_rwlock_trywrlock(&lock.PrimitiveLock) == 0)
+#endif
+        {
+            Lock = &lock;
+            return true;
+        }
+        return false;
+    }
+    void Clear()
+    {
+        if (Lock)
+#ifdef _WIN32
+            ::ReleaseSRWLockExclusive(&Lock->PrimitiveLock);
+#else
+            pthread_rwlock_unlock(&Lock->PrimitiveLock);
+#endif
+        Lock = nullptr;
+    }
+
+protected:
+    RWLock* Lock = nullptr;
+};

@@ -427,9 +427,14 @@ void UDPServer::OnAccept(const std::shared_ptr<Connection>& connection, u32 cook
     PreMapInsert(cookie, connection);
 }
 
-void UDPServer::HandlePreConnectData(Stream& stream)
+void UDPServer::HandlePreConnectData(Stream& rawStream)
 {
-    PreConnectionCipher.DecryptUDP(stream.GetFront(), stream.GetFront(), stream.GetRemaining());
+    u8* data = rawStream.GetFront();
+    int dataSize = rawStream.GetBufferSize();
+    PreConnectionCipher.DecryptUDP(data, data, dataSize);
+
+    Stream stream;
+    stream.WrapRead(data, dataSize);
 
     u16 partialTime;
     if (!stream.Serialize(partialTime))

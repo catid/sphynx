@@ -28,7 +28,7 @@ static const int kTCPRecvLimitBytes = 16000;
 static const int kServerWorkerTimerIntervalMsec = 30; // msec
 
 // Client timer interval
-static const int kClientWorkerTimerIntervalMsec = 100; // msec
+static const int kClientWorkerTimerIntervalMsec = 30; // msec
 
 // Interval between heartbeats
 static const int kS2CTCPHeartbeatIntervalMsec = 10000; // 10 seconds
@@ -139,6 +139,7 @@ public:
 
     void EncryptTCP(const u8* src, u8* dest, int bytes);
     void DecryptTCP(const u8* src, u8* dest, int bytes);
+
     void EncryptUDP(const u8* src, u8* dest, int bytes);
     void DecryptUDP(const u8* src, u8* dest, int bytes);
 

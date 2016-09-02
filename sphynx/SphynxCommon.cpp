@@ -127,12 +127,14 @@ void Encryptor::EncryptTCP(const u8* src, u8* dest, int bytes)
 {
     u8 last = OutgoingTCPEncState.LastByte;
     const u8 adder = (u8)(OutgoingTCPEncState.Key >> 9);
+
     for (int i = 0; i < bytes; ++i)
     {
         u8 cur = src[i];
         dest[i] = (cur ^ last) - adder;
         last = cur;
     }
+
     OutgoingTCPEncState.LastByte = last;
 }
 
@@ -140,21 +142,22 @@ void Encryptor::DecryptTCP(const u8* src, u8* dest, int bytes)
 {
     u8 last = IncomingTCPEncState.LastByte;
     const u8 adder = (u8)(IncomingTCPEncState.Key >> 9);
+
     for (int i = 0; i < bytes; ++i)
-    {
         dest[i] = last = (src[i] + adder) ^ last;
-    }
+
     IncomingTCPEncState.LastByte = last;
 }
 
 void Encryptor::EncryptUDP(const u8* src, u8* dest, int bytes)
 {
     u8 last = (u8)OutgoingUDPEncState.Key;
-    const u8 adder = (u8)(OutgoingUDPEncState.Key >> 9);
+    const u8 adder = (u8)(OutgoingUDPEncState.Key >> 8);
+
     for (int i = 0; i < bytes; ++i)
     {
         u8 cur = src[i];
-        dest[i] = (cur ^ last) - adder;
+        dest[i] = (cur + last) ^ adder;
         last = cur;
     }
 }
@@ -162,11 +165,10 @@ void Encryptor::EncryptUDP(const u8* src, u8* dest, int bytes)
 void Encryptor::DecryptUDP(const u8* src, u8* dest, int bytes)
 {
     u8 last = (u8)IncomingUDPEncState.Key;
-    const u8 adder = (u8)(IncomingUDPEncState.Key >> 9);
+    const u8 adder = (u8)(IncomingUDPEncState.Key >> 8);
+
     for (int i = 0; i < bytes; ++i)
-    {
-        dest[i] = last = (src[i] + adder) ^ last;
-    }
+        dest[i] = last = (src[i] ^ adder) - last;
 }
 
 void Encryptor::InitializeEncryption(u32 key, EncryptionRole role)
@@ -460,9 +462,14 @@ void SphynxPeer::OnTCPData(Stream& stream)
 	RouteData(stream);
 }
 
-void SphynxPeer::OnUDPData(u64 nowMsec, Stream& stream)
+void SphynxPeer::OnUDPData(u64 nowMsec, Stream& rawStream)
 {
-    Cipher.DecryptUDP(stream.GetFront(), stream.GetFront(), stream.GetBufferSize());
+    u8* data = rawStream.GetFront();
+    int dataSize = rawStream.GetBufferSize();
+    Cipher.DecryptUDP(data, data, dataSize);
+
+    Stream stream;
+    stream.WrapRead(data, dataSize);
 
 	u16 partialTime;
 	if (!stream.Serialize(partialTime))
