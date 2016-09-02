@@ -41,6 +41,7 @@ endif ()
 file(GLOB SharedDemoSourceFiles
 	"sphynxdemo/DemoProtocol.cpp"
 	"sphynxdemo/DemoProtocol.h"
+	"sphynxdemo/NeighborTracker.h"
 )
 
 get_cmake_property(_variableNames VARIABLES)
