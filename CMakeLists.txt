@@ -37,6 +37,8 @@ if (WIN32)
 else ()
 	get_filename_component(OtherCrashHandler "sphynx/g3log/crashhandler_windows.cpp" ABSOLUTE)
 	list(REMOVE_ITEM SphynxSourceFiles ${OtherCrashHandler})
+	get_filename_component(OtherStackTrace "sphynx/g3log/stacktrace_windows.cpp" ABSOLUTE)
+	list(REMOVE_ITEM SphynxSourceFiles ${OtherStackTrace})
 endif ()
 
 file(GLOB SharedDemoSourceFiles

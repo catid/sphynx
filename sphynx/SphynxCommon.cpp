@@ -61,7 +61,8 @@ u64 WindowedTimes::ComputeDelta(u64 nowMsec)
 
     static_assert(kWinCount == 2, "Need to change index update code");
     sample = BestRing + (RingWriteIndex ^ 1);
-    if (sample->FirstMsec == 0 || (s64)(nowMsec - sample->LocalRecvMsec) > kBackLimitMsec)
+    // Note: Signed conversion is intentional here to handle wrap-around properly
+    if (sample->FirstMsec == 0 || (s64)(nowMsec - sample->LocalRecvMsec) > (s64)kBackLimitMsec)
         return delta;
 
     u64 delta2 = sample->LocalRecvMsec - sample->RemoteSendMsec;
