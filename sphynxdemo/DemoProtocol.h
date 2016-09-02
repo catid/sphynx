@@ -2,7 +2,7 @@
 
 #include "Stream.h"
 #include <memory>
-#include "AABBCollisions.h"
+#include "NeighborTracker.h"
 
 
 //-----------------------------------------------------------------------------
