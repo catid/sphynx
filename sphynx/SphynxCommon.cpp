@@ -35,6 +35,8 @@ void WindowedTimes::Insert(u64 remoteSendMsec, u64 localRecvMsec)
         static_assert(kWinCount == 2, "Need to change index update code");
         RingWriteIndex ^= 1;
 
+        LOG(DBUG) << "Advanced to next time window index=" << RingWriteIndex;
+
         sample = BestRing + RingWriteIndex;
         sample->FirstMsec = localRecvMsec;
         sample->LocalRecvMsec = localRecvMsec;
@@ -245,7 +247,7 @@ void SphynxPeer::Start(std::shared_ptr<asio::io_context>& context)
 
 void SphynxPeer::Stop()
 {
-	LOG(DEBUG) << "Stopping TCP connection";
+	LOG(DBUG) << "Stopping TCP connection";
 
 	TCPSocket->close();
 	TCPSocket = nullptr;

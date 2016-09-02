@@ -176,7 +176,7 @@ struct MyServer : ServerInterface
         {
             if (connection != excluded)
             {
-                LOG(DEBUG) << "Broadcasting from " << (int)excluded->Id << " to " << (int)connection->Id;
+                LOG(DBUG) << "Broadcasting from " << (int)excluded->Id << " to " << (int)connection->Id;
 
                 (connection->*pFunction)(args...);
             }

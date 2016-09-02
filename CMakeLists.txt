@@ -13,6 +13,7 @@ else ()
 endif ()
 
 
+add_definitions(-DCHANGE_G3LOG_DEBUG_TO_DBUG=1)
 add_definitions(-DDISABLE_FATAL_SIGNALHANDLING=1)
 add_definitions(-DDISABLE_VECTORED_EXCEPTIONHANDLING=1)
 add_definitions(-DASIO_STANDALONE=1)

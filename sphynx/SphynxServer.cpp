@@ -92,7 +92,7 @@ void ServerWorker::Start(std::shared_ptr<asio::io_context>& context, unsigned th
     ThreadId = threadId;
     Settings = settings;
 
-    LOG(DEBUG) << "Thread " << ThreadId << ": Starting";
+    LOG(DBUG) << "Thread " << ThreadId << ": Starting";
 
     Timer = std::make_unique<asio::steady_timer>(*Context);
     PostNextTimer();
@@ -152,7 +152,7 @@ void ServerWorker::OnTimerTick()
 {
     u64 nowMsec = GetTimeMsec();
 
-    //LOG(DEBUG) << "Thread " << ThreadId << ": Tick " << nowMsec;
+    //LOG(DBUG) << "Thread " << ThreadId << ": Tick " << nowMsec;
 
     PromoteNewConnections();
 
@@ -172,7 +172,7 @@ void ServerWorker::OnTimerError(const asio::error_code& error)
 
 void ServerWorker::Stop()
 {
-    LOG(DEBUG) << "Thread " << ThreadId << ": Stopping";
+    LOG(DBUG) << "Thread " << ThreadId << ": Stopping";
 
     Terminated = true;
 
@@ -266,7 +266,7 @@ Connection::Connection()
         u64 nowMsec = GetTimeMsec();
         u64 sentTimeFullMsec = ReconstructMsec(nowMsec, sentTimeMsec);
 
-        LOG(DEBUG) << "Got heartbeat from " << (int)(nowMsec - sentTimeFullMsec);
+        LOG(DBUG) << "Got heartbeat from " << (int)(nowMsec - sentTimeFullMsec);
 
         // Client is keeping connection alive
     });
@@ -341,7 +341,7 @@ bool Connection::OnTick(u64 nowMsec)
     if (IsFullConnection && nowMsec - LastUDPTimeSyncMsec > static_cast<u64>(S2CUDPTimeSyncIntervalMsec))
     {
         LastUDPTimeSyncMsec = nowMsec;
-        LOG(DEBUG) << "Sending UDP timesync " << nowMsec;
+        LOG(DBUG) << "Sending UDP timesync " << nowMsec;
 
         u16 bestDelta = static_cast<u16>(WinTimes.ComputeDelta(nowMsec));
         RPCTimeSyncUDP(bestDelta);
@@ -357,7 +357,7 @@ bool Connection::OnTick(u64 nowMsec)
     if (nowMsec - LastTCPHeartbeatMsec > kS2CTCPHeartbeatIntervalMsec)
     {
         LastTCPHeartbeatMsec = nowMsec;
-        LOG(DEBUG) << "Sending TCP heartbeat " << nowMsec;
+        LOG(DBUG) << "Sending TCP heartbeat " << nowMsec;
 
         RPCHeartbeatTCP();
     }
@@ -473,7 +473,7 @@ void UDPServer::PostNextRecvFrom()
             Stream stream;
             stream.WrapRead(&UDPReceiveBuffer[0], bytes_transferred);
 
-            //LOG(DEBUG) << "UDP " << Port << ": Got data len=" << stream.GetRemaining();
+            //LOG(DBUG) << "UDP " << Port << ": Got data len=" << stream.GetRemaining();
 
             std::shared_ptr<Connection> connection;
             if (MapFind(FromEndpoint, connection))
@@ -601,7 +601,7 @@ void UDPServer::PreMapClear()
 
 void UDPServer::Stop()
 {
-    LOG(DEBUG) << "UDP " << Port << ": Stopping";
+    LOG(DBUG) << "UDP " << Port << ": Stopping";
 
     MapClear();
     PreMapClear();

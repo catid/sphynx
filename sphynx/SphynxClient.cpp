@@ -101,7 +101,7 @@ void SphynxClient::OnTimerTick()
             (nowMsec - LastUDPTimeSyncMsec > static_cast<u64>(S2CUDPTimeSyncIntervalMsec)))
         {
             LastUDPTimeSyncMsec = nowMsec;
-            LOG(DEBUG) << "Sending UDP heartbeat " << nowMsec;
+            LOG(DBUG) << "Sending UDP heartbeat " << nowMsec;
 
             RPCHeartbeatUDP(ToServerTime15(nowMsec));
 
@@ -116,7 +116,7 @@ void SphynxClient::OnTimerTick()
         if (nowMsec - LastTCPHeartbeatMsec > static_cast<u64>(kS2CTCPHeartbeatIntervalMsec))
         {
             LastTCPHeartbeatMsec = nowMsec;
-            LOG(DEBUG) << "Sending TCP heartbeat " << nowMsec;
+            LOG(DBUG) << "Sending TCP heartbeat " << nowMsec;
 
             RPCHeartbeatTCP(ToServerTime15(nowMsec));
         }
@@ -206,7 +206,7 @@ void SphynxClient::PostNextRecvFrom()
 			Stream stream;
             stream.WrapRead(&UDPReceiveBuffer[0], bytes_transferred);
 
-			//LOG(DEBUG) << "UDP: Got data len=" << stream.GetRemaining();
+			//LOG(DBUG) << "UDP: Got data len=" << stream.GetRemaining();
 
 			OnUDPData(nowMsec, stream);
 
@@ -297,7 +297,7 @@ void SphynxClient::OnConnect()
 
 void SphynxClient::Stop()
 {
-    LOG(DEBUG) << "Stopping client";
+    LOG(DBUG) << "Stopping client";
 
     Terminated = true;
 
