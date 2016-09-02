@@ -6,7 +6,7 @@ set(CMAKE_COLOR_MAKEFILE   ON)
 if (WIN32)
 	# Remove 'lib' prefix for shared libraries on Windows
 	set(CMAKE_SHARED_LIBRARY_PREFIX "")
-else
+else ()
 	# Use C++14 in GCC
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fexceptions -march=native -mtune=native")
@@ -31,13 +31,13 @@ file(GLOB SphynxSourceFiles
     "sphynx/g3log/*"
 )
 
-IF (WIN32)
+if (WIN32)
 	get_filename_component(OtherCrashHandler "sphynx/g3log/crashhandler_unix.cpp" ABSOLUTE)
 	list(REMOVE_ITEM SphynxSourceFiles ${OtherCrashHandler})
-ELSE()
+else ()
 	get_filename_component(OtherCrashHandler "sphynx/g3log/crashhandler_windows.cpp" ABSOLUTE)
 	list(REMOVE_ITEM SphynxSourceFiles ${OtherCrashHandler})
-ENDIF()
+endif ()
 
 file(GLOB SharedDemoSourceFiles
 	"sphynxdemo/DemoProtocol.cpp"
