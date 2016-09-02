@@ -8,6 +8,9 @@ if (WIN32)
   set(CMAKE_SHARED_LIBRARY_PREFIX "")
 endif ()
 
+# Use C++11 in GCC
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 add_definitions(-DDISABLE_FATAL_SIGNALHANDLING=1)
 add_definitions(-DDISABLE_VECTORED_EXCEPTIONHANDLING=1)
 add_definitions(-DASIO_STANDALONE=1)
