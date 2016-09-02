@@ -8,7 +8,7 @@
 #include <nmmintrin.h>
 #endif
 
-#ifndef _ANDROID
+#ifndef ANDROID
     #define HAS_CRC32_INTRINSIC /* disable if it doesn't compile */
 #endif
 

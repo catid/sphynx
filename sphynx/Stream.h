@@ -62,13 +62,17 @@ public:
     template<typename T>
     inline bool Serialize(std::vector<T>& vec)
     {
+#ifndef ANDROID
         static_assert(std::is_trivially_copyable<T>::value, "Serialize can only take vectors of trivially copyable types.");
+#endif
         return SerializeVec(vec);
     }
     template<typename T>
     inline bool Serialize(const std::vector<T>& vec)
     {
+#ifndef ANDROID
         static_assert(std::is_trivially_copyable<T>::value, "Serialize can only take vectors of trivially copyable types.");
+#endif
         return SerializeVec(vec);
     }
 
@@ -76,7 +80,9 @@ public:
     template<typename T>
     struct vector_view {
     public:
+#ifndef ANDROID
         static_assert(std::is_trivially_copyable<T>::value, "vector_view can only be used with trivially copyable types.");
+#endif
         vector_view() : buffer(nullptr), count(0) {}
         vector_view(T* buffer, size_t count) : buffer(buffer), count(count) {}
 

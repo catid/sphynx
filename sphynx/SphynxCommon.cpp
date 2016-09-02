@@ -543,7 +543,7 @@ void SphynxPeer::OnTCPClose()
 //-----------------------------------------------------------------------------
 // Logging
 
-#ifdef _ANDROID
+#ifdef ANDROID
     #include <android/log.h>
 #else
     #include <iostream>
@@ -554,7 +554,7 @@ struct CustomSink
     void log(g3::LogMessageMover message)
     {
         std::string str = message.get().toString();
-#ifdef _ANDROID
+#ifdef ANDROID
         __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "%s", str.c_str());
 #else
         std::cout << str;
