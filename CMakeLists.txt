@@ -17,7 +17,7 @@ add_definitions(-DASIO_STANDALONE=1)
 add_definitions(-DASIO_NO_DEPRECATED=1)
 add_definitions(-DASIO_HEADER_ONLY=1)
 
-include_directories(sphynx)
+include_directories(sphynx sphynx/asio/include)
 
 # Not ideal but fine if I remember to always rebuild:
 file(GLOB SphynxSourceFiles

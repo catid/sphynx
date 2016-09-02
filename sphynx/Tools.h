@@ -68,6 +68,8 @@ private:
 
 #else
 
+#include <mutex>
+
 class Lock
 {
 public:
