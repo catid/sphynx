@@ -2,6 +2,8 @@
 
 #ifndef _WIN32
 #include <pthread.h>
+#include <unistd.h>
+#include <sys/time.h> // gettimeofday
 #endif
 
 #ifdef _WIN32
@@ -73,7 +75,7 @@ bool SetCurrentThreadAffinity(unsigned processorIndex)
 #else
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
-    CPU_SET(i, &cpuset);
+    CPU_SET(processorIndex, &cpuset);
     return 0 == pthread_setaffinity_np(pthread_self(),
         sizeof(cpu_set_t), &cpuset);
 #endif
