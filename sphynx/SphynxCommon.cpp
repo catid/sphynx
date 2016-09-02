@@ -538,3 +538,39 @@ void SphynxPeer::OnTCPClose()
 	LOG(INFO) << "TCP close";
 	Disconnect();
 }
+
+
+//-----------------------------------------------------------------------------
+// Logging
+
+#ifdef _ANDROID
+    #include <android/log.h>
+#else
+    #include <iostream>
+#endif
+
+struct CustomSink
+{
+    void log(g3::LogMessageMover message)
+    {
+        std::string str = message.get().toString();
+#ifdef _ANDROID
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "%s", str.c_str());
+#else
+        std::cout << str;
+#endif
+#ifdef _WIN32
+        ::OutputDebugStringA(str.c_str());
+#endif
+    }
+};
+
+void InitializeLogging()
+{
+    // Setup logging
+    std::unique_ptr<g3::LogWorker> logworker = g3::LogWorker::createLogWorker();
+    //logworker->addDefaultLogger("client", "");
+    auto sinkHandle = logworker->addSink(std::make_unique<CustomSink>(),
+        &CustomSink::log);
+    g3::initializeLogging(logworker.get());
+}

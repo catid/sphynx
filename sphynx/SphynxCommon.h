@@ -244,3 +244,9 @@ protected:
     std::unique_ptr<u8[]> CompressionBuffer;
 	size_t CompressionBufferSize = 0;
 };
+
+
+//-----------------------------------------------------------------------------
+// Logging
+
+void InitializeLogging();

@@ -40,6 +40,7 @@ endif ()
 
 file(GLOB SharedDemoSourceFiles
 	"sphynxdemo/DemoProtocol.cpp"
+	"sphynxdemo/DemoProtocol.h"
 )
 
 get_cmake_property(_variableNames VARIABLES)
@@ -60,7 +61,7 @@ target_link_libraries(UDPServer ${CMAKE_THREAD_LIBS_INIT})
 endif ()
 
 project (Client)
-add_executable(UDPClient "sphynxdemo/UDPClientMain.cpp" ${SharedDemoSourceFiles})
+add_executable(UDPClient "sphynxdemo/UDPClientMain.cpp" "sphynxdemo/UDPClientLib.h" "sphynxdemo/UDPClientLib.cpp" ${SharedDemoSourceFiles})
 target_link_libraries(UDPClient SphynxNetworking)
 
 find_package (Threads)

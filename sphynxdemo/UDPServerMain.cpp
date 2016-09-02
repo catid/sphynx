@@ -330,32 +330,9 @@ void MyConnection::OnDisconnect(Connection* connection)
 
 
 
-
-
-
-
-
-// Logging
-struct CustomSink
-{
-    void log(g3::LogMessageMover message)
-    {
-        std::string str = message.get().toString();
-        std::cout << str;
-#ifdef _WIN32
-        ::OutputDebugStringA(str.c_str());
-#endif
-    }
-};
-
 int main()
 {
-    // Setup logging
-    std::unique_ptr<g3::LogWorker> logworker = g3::LogWorker::createLogWorker();
-    //logworker->addDefaultLogger("server", "");
-    auto sinkHandle = logworker->addSink(std::make_unique<CustomSink>(),
-        &CustomSink::log);
-    g3::initializeLogging(logworker.get());
+    InitializeLogging();
 
     SetThreadName("Main");
 
