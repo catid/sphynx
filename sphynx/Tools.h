@@ -43,8 +43,14 @@ typedef int8_t s8;
 
 #include <intrin.h>
 
-#define DEBUG_BREAK __debugbreak()
+#ifdef _WIN32
+    #define DEBUG_BREAK __debugbreak()
+#else
+    #define DEBUG_BREAK __builtin_trap()
+#endif
 #define DEBUG_ASSERT(cond) do { if (!(cond)) { DEBUG_BREAK; } } while(false);
+
+#ifdef _WIN32
 
 class Lock
 {
@@ -57,6 +63,22 @@ public:
 private:
     CRITICAL_SECTION cs;
 };
+
+#else
+
+class Lock
+{
+public:
+    Lock() {}
+    ~Lock() {}
+    bool TryEnter() { return cs.try_lock(); }
+    void Enter() { cs.lock(); }
+    void Leave() { cs.unlock(); }
+private:
+    std::recursive_mutex cs;
+};
+
+#endif
 
 class Locker
 {

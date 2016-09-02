@@ -96,6 +96,10 @@ u64 GetTimeUsec()
         PerfFrequencyInverse = 1000000. / (double)freq.QuadPart;
     }
     return (u64)(PerfFrequencyInverse * timeStamp.QuadPart);
+#else
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    return 1000000 * tv.tv_sec + tv.tv_usec;
 #endif // _WIN32
 }
 
@@ -114,6 +118,10 @@ u64 GetTimeMsec()
         PerfFrequencyInverse = 1000. / (double)freq.QuadPart;
     }
     return (u64)(PerfFrequencyInverse * timeStamp.QuadPart);
+#else
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    return 1000 * tv.tv_sec + tv.tv_usec / 1000;
 #endif // _WIN32
 }
 
@@ -121,5 +129,7 @@ u64 GetSloppyMsec()
 {
 #ifdef _WIN32
     return ::GetTickCount64();
+#else
+    return GetTimeMsec();
 #endif // _WIN32
 }

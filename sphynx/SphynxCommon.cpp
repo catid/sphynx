@@ -93,7 +93,7 @@ bool IgnoreUnreachable(std::shared_ptr<asio::ip::udp::socket>& s, bool ignore)
         return false;
     }
 #else
-#error "FIXME"
+    // TODO
 #endif
 
     return true;
@@ -112,7 +112,7 @@ bool DontFragment(std::shared_ptr<asio::ip::udp::socket>& s, bool df)
         return false;
     }
 #else
-#error "FIXME"
+    // TODO
 #endif
 
     return true;
