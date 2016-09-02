@@ -210,3 +210,13 @@ public:
         return CAT_ROL32((u32)_x, 7) + (u32)_y;
     }
 };
+
+#if defined(_MSC_VER)
+    #define CAT_ALIGNED(x) __declspec(align(x))
+#else
+#if defined(__GNUC__)
+    #define CAT_ALIGNED(x) __attribute__ ((aligned(x)))
+#endif
+#endif
+
+#define ALIGNED_TYPE(t,x) typedef t CAT_ALIGNED(x)

@@ -10,13 +10,16 @@
 
 #define HAS_CRC32_INTRINSIC /* disable if it doesn't compile */
 
+ALIGNED_TYPE(asio::ip::address_v4::bytes_type, 16) aligned_v4_t;
+ALIGNED_TYPE(asio::ip::address_v6::bytes_type, 16) aligned_v6_t;
+
 uint32_t hash_ip_addr(const asio::ip::udp::endpoint& addr)
 {
     uint32_t key;
 
     if (addr.address().is_v4())
     {
-        auto& v4bytes = addr.address().to_v4().to_bytes();
+        aligned_v4_t v4bytes = addr.address().to_v4().to_bytes();
         key = *(uint32_t*)&v4bytes[0];
 #ifdef HAS_CRC32_INTRINSIC
         key = _mm_crc32_u32(addr.port(), key);
@@ -30,7 +33,7 @@ uint32_t hash_ip_addr(const asio::ip::udp::endpoint& addr)
     }
     else
     {
-        auto& v6bytes = addr.address().to_v6().to_bytes();
+        aligned_v6_t v6bytes = addr.address().to_v6().to_bytes();
         uint32_t* keywords = (uint32_t*)&v6bytes[0];
 #ifdef HAS_CRC32_INTRINSIC
         key = _mm_crc32_u32(addr.port(), keywords[0]);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SphynxCommon.h"
+#include <list>
 
 struct ServerSettings;
 class Connection;
