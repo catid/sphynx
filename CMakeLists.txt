@@ -19,15 +19,12 @@ add_definitions(-DASIO_STANDALONE=1)
 add_definitions(-DASIO_NO_DEPRECATED=1)
 add_definitions(-DASIO_HEADER_ONLY=1)
 
-include_directories(sphynx sphynx/asio/include)
+include_directories(sphynx sphynx/asio)
 
 # Not ideal but fine if I remember to always rebuild:
 file(GLOB SphynxSourceFiles
     "sphynx/*"
-    "sphynx/zstd/lib/dictBuilder/*"
-    "sphynx/zstd/lib/decompress/*"
-    "sphynx/zstd/lib/compress/*"
-    "sphynx/zstd/lib/common/*"
+    "sphynx/zstd/*"
     "sphynx/g3log/*"
 )
 

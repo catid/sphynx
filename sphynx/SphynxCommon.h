@@ -1,15 +1,15 @@
 #pragma once
 
 #include "Tools.h"
-#include "asio/include/asio.hpp"
+#include "asio.hpp"
 #include <memory>
 #include <thread>
 #include "g3log/g3log.hpp"
 #include "g3log/logworker.hpp"
 #include "Stream.h"
 #include "RPC.h"
-#include "zstd/lib/zstd.h"
-#include "zstd/lib/common/zbuff.h"
+#include "zstd/zstd.h"
+#include "zstd/zbuff.h"
 
 
 //-----------------------------------------------------------------------------
