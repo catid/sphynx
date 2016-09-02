@@ -50,11 +50,6 @@ namespace g3 {
    //  wrap for std::chrono::system_clock::now()
    std::time_t systemtime_now();
 
-   // OSX, Windows needed wrapper for std::timespec_get(struct timespec *ts, int base)
-   //   OSX and Windows also lacks the POSIX clock_gettime(int base, struct timespec *ts)
-   //   so for that reason we go with the std::timespec_get(...) but wrap it
-   int timespec_get(struct timespec* ts/*, int base*/);
-
    // This mimics the original "std::put_time(const std::tm* tmb, const charT* fmt)"
    // This is needed since latest version (at time of writing) of gcc4.7 does not implement this library function yet.
    // return value is SIMPLIFIED to only return a std::string

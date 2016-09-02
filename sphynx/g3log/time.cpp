@@ -85,34 +85,6 @@ namespace g3 {
       return std::chrono::system_clock::to_time_t(system_now);
    }
 
-
-   int timespec_get(struct timespec* ts/*, int base*/) {
-#ifdef __MACH__
-      // std::timespec_get or posix clock_gettime)(...) are not
-      // implemented on OSX
-      // @return value of base if successful, else zero
-      struct timeval now = {};
-      int rv = gettimeofday(&now, nullptr);
-      if (-1 == rv) {
-         return rv;
-      }
-      // error mode. just return sec, microsecond
-      ts->tv_sec  = now.tv_sec;
-      ts->tv_nsec = now.tv_usec * 1000;
-      return 0;
-#elif(defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
-       ts->tv_sec = std::clock() / CLOCKS_PER_SEC;
-       ts->tv_nsec = 0;
-	   return 0;
-#else
-	   // ubuntu/gcc5 has no support for std::timespec_get(...) as of yet
-	   return clock_gettime(CLOCK_REALTIME, ts);
-
-#endif
-   }
-
-
-
    // This mimics the original "std::put_time(const std::tm* tmb, const charT* fmt)"
    // This is needed since latest version (at time of writing) of gcc4.7 does not implement this library function yet.
    // return value is SIMPLIFIED to only return a std::string

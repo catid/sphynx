@@ -27,7 +27,7 @@ namespace g3 {
    // helper for setting the normal log details in an entry
    std::string LogDetailsToString(const LogMessage& msg) {
       std::string out;
-      out.append("\n" + msg.timestamp() + "\t"
+      out.append("\n" /*+ msg.timestamp() + "\t" */
                  + msg.level() + " [" + msg.file() + "->" + msg.function() + ":" + msg.line() + "]\t");
       return out;
    }
@@ -43,9 +43,8 @@ namespace g3 {
    // helper for fatal signal
    std::string  fatalSignalToString(const LogMessage& msg) {
       std::string out; // clear any previous text and formatting
-      out.append("\n" + msg.timestamp()
-                 + "\n\n***** FATAL SIGNAL RECEIVED ******* \n"
-                 + '"' + msg.message() + '"');
+      out.append(/*"\n" + msg.timestamp()
+                 +*/ "\n\n***** FATAL SIGNAL RECEIVED ******* \n'" + msg.message() + '"');
       return out;
    }
 
@@ -53,8 +52,8 @@ namespace g3 {
    // helper for fatal exception (windows only)
    std::string  fatalExceptionToString(const LogMessage& msg) {
       std::string out; // clear any previous text and formatting
-      out.append("\n" + msg.timestamp()
-                 + "\n\n***** FATAL EXCEPTION RECEIVED ******* \n"
+      out.append(/*"\n" + msg.timestamp()
+                 + */"\n\n***** FATAL EXCEPTION RECEIVED ******* \n"
                  + '"' + msg.message() + '"');
       return out;
    }
@@ -111,7 +110,8 @@ namespace g3 {
 
 
    std::string LogMessage::timestamp(const std::string& time_look) const {
-      return g3::localtime_formatted(_timestamp, time_look);
+      //return g3::localtime_formatted(_timestamp, time_look);
+       return std::string();
    }
 
 
@@ -131,7 +131,7 @@ namespace g3 {
       , _function(function)
       , _level(level)
    {
-      g3::timespec_get(&_timestamp/*, TIME_UTC*/);
+      //g3::timespec_get(&_timestamp/*, TIME_UTC*/);
       // Another possibility could be to Falling back to clock_gettime as TIME_UTC 
       // is not recognized by travis CI. 
       // i.e. clock_gettime(CLOCK_REALTIME, &_timestamp);
