@@ -41,7 +41,9 @@ typedef int16_t s16;
 typedef uint8_t u8;
 typedef int8_t s8;
 
-#include <intrin.h>
+#ifdef _WIN32
+    #include <intrin.h>
+#endif
 
 #ifdef _WIN32
     #define DEBUG_BREAK __debugbreak()
