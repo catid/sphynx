@@ -2,20 +2,22 @@
 
 #include <thread>
 
-#define WIN32_LEAN_AND_MEAN
+#ifdef _WIN32
+    #define WIN32_LEAN_AND_MEAN
 
-#ifndef _WINSOCKAPI_
-    #define DID_DEFINE_WINSOCKAPI
-    #define _WINSOCKAPI_
-#endif
-#ifndef NOMINMAX
-    #define NOMINMAX
-#endif
-#ifndef _WIN32_WINNT
-    #define _WIN32_WINNT 0x0601 /* Windows 7+ */
-#endif
+    #ifndef _WINSOCKAPI_
+        #define DID_DEFINE_WINSOCKAPI
+        #define _WINSOCKAPI_
+    #endif
+    #ifndef NOMINMAX
+        #define NOMINMAX
+    #endif
+    #ifndef _WIN32_WINNT
+        #define _WIN32_WINNT 0x0601 /* Windows 7+ */
+    #endif
 
-#include <windows.h>
+    #include <windows.h>
+#endif
 
 #ifdef DID_DEFINE_WINSOCKAPI
     #undef _WINSOCKAPI_

@@ -11,14 +11,6 @@
 #ifndef ASIO_DETAIL_CONFIG_HPP
 #define ASIO_DETAIL_CONFIG_HPP
 
-// Added this -cat
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501
-#endif
-#define ASIO_STANDALONE
-#define ASIO_NO_DEPRECATED
-#define ASIO_HEADER_ONLY
-
 #if defined(ASIO_STANDALONE)
 # define ASIO_DISABLE_BOOST_ARRAY 1
 # define ASIO_DISABLE_BOOST_ASSERT 1
