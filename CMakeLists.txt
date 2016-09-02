@@ -52,10 +52,20 @@ endforeach()
 
 add_library(SphynxNetworking STATIC ${SphynxSourceFiles})
 
+find_package (Threads)
+
 project (Server)
 add_executable(UDPServer "sphynxdemo/UDPServerMain.cpp" ${SharedDemoSourceFiles})
 target_link_libraries(UDPServer SphynxNetworking)
+if (WIN32)
+else ()
+target_link_libraries(UDPServer ${CMAKE_THREAD_LIBS_INIT})
+endif ()
 
 project (Client)
 add_executable(UDPClient "sphynxdemo/UDPClientMain.cpp" ${SharedDemoSourceFiles})
 target_link_libraries(UDPClient SphynxNetworking)
+if (WIN32)
+else ()
+target_link_libraries(UDPClient ${CMAKE_THREAD_LIBS_INIT})
+endif ()
