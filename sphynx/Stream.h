@@ -1,13 +1,12 @@
 #pragma once
 
-#include <stdint.h>
-
 #include "Tools.h"
-
 #include <type_traits> // std::is_enum() std::enable_if()
 #include <string>
+#include <cstring>
 #include <memory>
 #include <vector>
+
 
 //-----------------------------------------------------------------------------
 // Stream
