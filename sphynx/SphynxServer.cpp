@@ -8,7 +8,9 @@
 #include <nmmintrin.h>
 #endif
 
-#define HAS_CRC32_INTRINSIC /* disable if it doesn't compile */
+#ifndef _ANDROID
+    #define HAS_CRC32_INTRINSIC /* disable if it doesn't compile */
+#endif
 
 ALIGNED_TYPE(asio::ip::address_v4::bytes_type, 16) aligned_v4_t;
 ALIGNED_TYPE(asio::ip::address_v6::bytes_type, 16) aligned_v6_t;
