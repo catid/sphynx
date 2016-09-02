@@ -1,0 +1,245 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\zstd">
+      <UniqueIdentifier>{6bec0f18-ccb7-4036-8181-7ed83cbbce95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\asio">
+      <UniqueIdentifier>{f700a7a9-8765-4b47-bf2e-eb1bbfca4cca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\g3log">
+      <UniqueIdentifier>{3a90922f-4292-4404-bf0f-61d94382a811}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\sphynx\zstd\lib\dictBuilder\divsufsort.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\zstd\lib\dictBuilder\zdict.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\zstd\lib\decompress\zbuff_decompress.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\zstd\lib\decompress\zstd_decompress.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\zstd\lib\decompress\huf_decompress.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\zstd\lib\compress\zstd_compress.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\zstd\lib\compress\fse_compress.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\zstd\lib\compress\huf_compress.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\zstd\lib\compress\zbuff_compress.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\zstd\lib\common\entropy_common.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\zstd\lib\common\fse_decompress.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\zstd\lib\common\xxhash.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\zstd\lib\common\zstd_common.c">
+      <Filter>Source Files\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="UDPServerMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\SphynxServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\Tools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\Stream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\SphynxClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\SphynxCommon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\g3log\crashhandler_windows.cpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\g3log\filesink.cpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\g3log\g3log.cpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\g3log\logcapture.cpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\g3log\loglevels.cpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\g3log\logmessage.cpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\g3log\logworker.cpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\g3log\stacktrace_windows.cpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sphynx\g3log\time.cpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoProtocol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\sphynx\zstd\lib\zstd.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\zstd\lib\dictBuilder\zdict.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\zstd\lib\dictBuilder\divsufsort.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\zstd\lib\compress\zstd_opt.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\zstd\lib\common\error_private.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\zstd\lib\common\error_public.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\zstd\lib\common\fse.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\zstd\lib\common\huf.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\zstd\lib\common\mem.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\zstd\lib\common\xxhash.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\zstd\lib\common\zbuff.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\zstd\lib\common\zstd_internal.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\zstd\lib\common\bitstream.h">
+      <Filter>Source Files\zstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\asio\include\asio.hpp">
+      <Filter>Source Files\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\SphynxServer.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\Tools.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\AABBCollisions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\Stream.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\RPC.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\SphynxClient.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\SphynxCommon.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\active.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\crashhandler.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\filesink.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\future.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\g2log.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\g3log.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\logcapture.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\loglevels.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\logmessage.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\logworker.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\moveoncopy.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\shared_queue.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\sink.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\sinkhandle.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\sinkwrapper.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\stacktrace_windows.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\std2_make_unique.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\stlpatch_future.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sphynx\g3log\time.hpp">
+      <Filter>Source Files\g3log</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoProtocol.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\sphynx\g3log\filesinkhelper.ipp">
+      <Filter>Source Files\g3log</Filter>
+    </None>
+  </ItemGroup>
+</Project>
