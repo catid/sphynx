@@ -11,3 +11,17 @@
 
 // CMake induced definitions below. See g3log/Options.cmake for details.
 
+
+#if defined(ANDROID) && !defined(DEFINED_TO_STRING)
+#define DEFINED_TO_STRING
+#include <sstream>
+namespace std {
+    template <typename T>
+    std::string to_string(T value)
+    {
+        std::ostringstream os;
+        os << value;
+        return os.str();
+    }
+} // namespace std
+#endif

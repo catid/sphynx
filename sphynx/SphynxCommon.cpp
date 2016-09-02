@@ -8,7 +8,7 @@ void WindowedTimes::Reset()
 {
     Locker locker(StateLock);
 
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < kWinCount; ++i)
     {
         BestRing[i] = Sample();
     }
@@ -545,6 +545,7 @@ void SphynxPeer::OnTCPClose()
 
 #ifdef ANDROID
     #include <android/log.h>
+    #define LOG_TAG "sphynx"
 #else
     #include <iostream>
 #endif

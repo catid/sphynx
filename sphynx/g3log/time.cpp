@@ -6,6 +6,7 @@
 * For more information see g3log/LICENSE or refer refer to http://unlicense.org
 * ============================================================================*/
 
+#include "g3log/generated_definitions.hpp"
 #include "g3log/time.hpp"
 
 #include <sstream>

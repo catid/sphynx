@@ -358,7 +358,8 @@ protected:
 };
 
 
-#ifdef ANDROID
+#if defined(ANDROID) && !defined(DEFINED_TO_STRING)
+#define DEFINED_TO_STRING
 #include <sstream>
 namespace std {
     template <typename T>

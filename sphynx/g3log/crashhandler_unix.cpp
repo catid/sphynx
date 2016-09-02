@@ -19,7 +19,9 @@
 #include <csignal>
 #include <cstring>
 #include <unistd.h>
+#ifndef ANDROID
 #include <execinfo.h>
+#endif
 #include <cxxabi.h>
 #include <cstdlib>
 #include <sstream>
@@ -153,7 +155,9 @@ namespace g3 {
          if (nullptr != rawdump && !std::string(rawdump).empty()) {
             return {rawdump};
          }
-
+#ifdef ANDROID
+         return std::string();
+#else
          const size_t max_dump_size = 50;
          void* dump[max_dump_size];
          size_t size = backtrace(dump, max_dump_size);
@@ -201,6 +205,7 @@ namespace g3 {
          } // END: for(size_t idx = 1; idx < size && messages != nullptr; ++idx)
          free(messages);
          return oss.str();
+#endif
       }
 
 

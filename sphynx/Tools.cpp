@@ -72,12 +72,14 @@ bool SetCurrentThreadAffinity(unsigned processorIndex)
 #ifdef _WIN32
     return 0 != ::SetThreadAffinityMask(
         ::GetCurrentThread(), (DWORD_PTR)1 << (processorIndex & 63));
-#else
+#elif !defined(ANDROID)
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     CPU_SET(processorIndex, &cpuset);
     return 0 == pthread_setaffinity_np(pthread_self(),
         sizeof(cpu_set_t), &cpuset);
+#else
+    return true; // FIXME: Unused on Android anyway
 #endif
 }
 
