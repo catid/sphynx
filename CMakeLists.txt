@@ -3,13 +3,15 @@ cmake_minimum_required (VERSION 2.6)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_COLOR_MAKEFILE   ON)
 
-# Remove 'lib' prefix for shared libraries on Windows
 if (WIN32)
-  set(CMAKE_SHARED_LIBRARY_PREFIX "")
+	# Remove 'lib' prefix for shared libraries on Windows
+	set(CMAKE_SHARED_LIBRARY_PREFIX "")
+else
+	# Use C++14 in GCC
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fexceptions -march=native -mtune=native")
 endif ()
 
-# Use C++14 in GCC
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 add_definitions(-DDISABLE_FATAL_SIGNALHANDLING=1)
 add_definitions(-DDISABLE_VECTORED_EXCEPTIONHANDLING=1)
