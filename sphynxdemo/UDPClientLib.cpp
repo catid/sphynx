@@ -94,11 +94,11 @@ void MyClient::OnDisconnect(SphynxClient* client)
 MyClient* m_myclient = nullptr;
 SphynxClient* m_client = nullptr;
 
-void StartSphynx()
+void StartSphynxClient()
 {
     SetThreadName("Main");
 
-    InitializeLogging();
+    StartLogging();
 
     LOG(INFO) << "UDPClient starting";
 
@@ -113,7 +113,7 @@ void StartSphynx()
     m_client->Start(settings);
 }
 
-void StopSphynx()
+void StopSphynxClient()
 {
     if (!m_client)
         return;
@@ -125,4 +125,6 @@ void StopSphynx()
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     delete m_myclient;
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+    StopLogging();
 }

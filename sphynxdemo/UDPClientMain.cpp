@@ -2,18 +2,12 @@
 
 int main()
 {
-    SetThreadName("Main");
-
-    InitializeLogging();
-
-    LOG(INFO) << "UDPClient starting";
-
-    StartSphynx();
+    StartSphynxClient();
     for (;;)
     {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    StopSphynx();
+    StopSphynxClient();
 
     return 0;
 }

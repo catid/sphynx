@@ -332,7 +332,7 @@ void MyConnection::OnDisconnect(Connection* connection)
 
 int main()
 {
-    InitializeLogging();
+    StartLogging();
 
     SetThreadName("Main");
 
@@ -356,6 +356,8 @@ int main()
     server.Stop();
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    StopLogging();
 
     return 0;
 }

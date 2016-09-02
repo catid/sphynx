@@ -63,5 +63,5 @@ struct MyClient : ClientInterface
 //-----------------------------------------------------------------------------
 // Singletons
 
-void StartSphynx();
-void StopSphynx();
+void StartSphynxClient();
+void StopSphynxClient();

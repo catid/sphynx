@@ -565,12 +565,19 @@ struct CustomSink
     }
 };
 
-void InitializeLogging()
+std::unique_ptr<g3::LogWorker> m_logworker;
+
+void StartLogging()
 {
     // Setup logging
-    std::unique_ptr<g3::LogWorker> logworker = g3::LogWorker::createLogWorker();
+    m_logworker = g3::LogWorker::createLogWorker();
     //logworker->addDefaultLogger("client", "");
-    auto sinkHandle = logworker->addSink(std::make_unique<CustomSink>(),
+    auto sinkHandle = m_logworker->addSink(std::make_unique<CustomSink>(),
         &CustomSink::log);
-    g3::initializeLogging(logworker.get());
+    g3::initializeLogging(m_logworker.get());
+}
+
+void StopLogging()
+{
+    m_logworker.reset();
 }

@@ -249,4 +249,5 @@ protected:
 //-----------------------------------------------------------------------------
 // Logging
 
-void InitializeLogging();
+void StartLogging();
+void StopLogging();
