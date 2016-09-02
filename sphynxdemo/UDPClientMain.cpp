@@ -177,8 +177,8 @@ int main()
     MyClient myclient;
 
     auto settings = std::make_shared<ClientSettings>();
-    //settings->Host = "slycog.com";
-    settings->Host = "127.0.0.1";
+    settings->Host = "slycog.com";
+    //settings->Host = "127.0.0.1";
     settings->TCPPort = 5060;
     settings->Interface = &myclient;
 

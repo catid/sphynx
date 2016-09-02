@@ -96,7 +96,8 @@ void SphynxClient::OnTimerTick()
             return;
         }
 
-        if (IsFullConnection && nowMsec - LastUDPTimeSyncMsec > S2CUDPTimeSyncIntervalMsec)
+        if (IsFullConnection &&
+            (nowMsec - LastUDPTimeSyncMsec > static_cast<u64>(S2CUDPTimeSyncIntervalMsec)))
         {
             LastUDPTimeSyncMsec = nowMsec;
             LOG(DEBUG) << "Sending UDP heartbeat " << nowMsec;
@@ -111,7 +112,7 @@ void SphynxClient::OnTimerTick()
             }
         }
 
-        if (nowMsec - LastTCPHeartbeatMsec > kS2CTCPHeartbeatIntervalMsec)
+        if (nowMsec - LastTCPHeartbeatMsec > static_cast<u64>(kS2CTCPHeartbeatIntervalMsec))
         {
             LastTCPHeartbeatMsec = nowMsec;
             LOG(DEBUG) << "Sending TCP heartbeat " << nowMsec;
