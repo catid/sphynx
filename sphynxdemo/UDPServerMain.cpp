@@ -79,7 +79,9 @@ struct CustomSink
     {
         std::string str = message.get().toString();
         std::cout << str;
+#ifdef _WIN32
         ::OutputDebugStringA(str.c_str());
+#endif
     }
 };
 
@@ -106,8 +108,10 @@ int main()
 
     Server server;
     server.Start(settings);
-    ::Sleep(1000000);
+    std::this_thread::sleep_for(std::chrono::seconds(1000));
     server.Stop();
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
     return 0;
 }
