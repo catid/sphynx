@@ -4,8 +4,7 @@
 #include "asio.hpp"
 #include <memory>
 #include <thread>
-#include "g3log/g3log.hpp"
-#include "g3log/logworker.hpp"
+#include "Logging.h"
 #include "Stream.h"
 #include "RPC.h"
 #include "zstd/zstd.h"
@@ -47,7 +46,8 @@ static const int kUDPDatagramMax = 490;
 static const int kClientHandshakeIntervalMsec = 100; // msec
 
 // Packing buffer sizes
-static const int kPackingBufferSizeBytes = kUDPDatagramMax; // in bytes
+static const int kUDPPackingBufferSizeBytes = kUDPDatagramMax; // in bytes
+static const int kTCPPackingBufferSizeBytes = 16000; // in bytes
 
 // Compression level to use for TCP packet compression
 static const int kCompressionLevel = 9;
@@ -244,10 +244,3 @@ protected:
     std::unique_ptr<u8[]> CompressionBuffer;
 	size_t CompressionBufferSize = 0;
 };
-
-
-//-----------------------------------------------------------------------------
-// Logging
-
-void StartLogging();
-void StopLogging();

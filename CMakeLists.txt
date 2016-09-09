@@ -13,9 +13,6 @@ else ()
 endif ()
 
 
-add_definitions(-DCHANGE_G3LOG_DEBUG_TO_DBUG=1)
-add_definitions(-DDISABLE_FATAL_SIGNALHANDLING=1)
-add_definitions(-DDISABLE_VECTORED_EXCEPTIONHANDLING=1)
 add_definitions(-DASIO_STANDALONE=1)
 add_definitions(-DASIO_NO_DEPRECATED=1)
 add_definitions(-DASIO_HEADER_ONLY=1)
@@ -26,18 +23,7 @@ include_directories(sphynx)
 file(GLOB SphynxSourceFiles
     "sphynx/*"
     "sphynx/zstd/*"
-    "sphynx/g3log/*"
 )
-
-if (WIN32)
-	get_filename_component(OtherCrashHandler "sphynx/g3log/crashhandler_unix.cpp" ABSOLUTE)
-	list(REMOVE_ITEM SphynxSourceFiles ${OtherCrashHandler})
-else ()
-	get_filename_component(OtherCrashHandler "sphynx/g3log/crashhandler_windows.cpp" ABSOLUTE)
-	list(REMOVE_ITEM SphynxSourceFiles ${OtherCrashHandler})
-	get_filename_component(OtherStackTrace "sphynx/g3log/stacktrace_windows.cpp" ABSOLUTE)
-	list(REMOVE_ITEM SphynxSourceFiles ${OtherStackTrace})
-endif ()
 
 file(GLOB SharedDemoSourceFiles
 	"sphynxdemo/DemoProtocol.cpp"

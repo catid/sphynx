@@ -1,21 +1,24 @@
 #include "UDPClientLib.h"
 
+static logging::Channel Logger("MyClient");
+
+
 void MyClient::OnConnectFail(SphynxClient* client)
 {
-    LOG(INFO) << "Failed to connect";
+    Logger.Info("Failed to connect");
 }
 
 void MyClient::OnConnect(SphynxClient* client)
 {
     Client = client;
-    LOG(INFO) << "Connected";
+    Logger.Info("Connected");
 
     TCPLogin.CallSender = client->TCPCallSender;
     UDPPositionUpdate.CallSender = client->UDPCallSender;
 
     client->Router.Set<S2CSetPlayerIdT>(S2CSetPlayerIdID, [this](playerid_t pid)
     {
-        LOG(INFO) << "Set my player id = " << (int)pid;
+        Logger.Info("Set my player id = ", (int)pid);
 
         Id = pid;
     });
@@ -24,11 +27,11 @@ void MyClient::OnConnect(SphynxClient* client)
         bool success = Players.insert(PlayerMap::value_type(pid, name)).second;
         if (!success)
         {
-            LOG(WARNING) << "Player " << (int)pid << " added twice!";
+            Logger.Warning("Player ", (int)pid, " added twice!");
         }
         else
         {
-            LOG(INFO) << "Player " << (int)pid << " joined: " << name;
+            Logger.Info("Player ", (int)pid, " joined: ", name);
         }
     });
     client->Router.Set<S2CPlayerRemoveT>(S2CRemovePlayerID, [this](playerid_t pid)
@@ -37,13 +40,13 @@ void MyClient::OnConnect(SphynxClient* client)
         bool found = (iter != Players.end());
         if (found)
         {
-            LOG(INFO) << "Player " << (int)pid << " quit: " << iter->second.Name;
+            Logger.Info("Player ", (int)pid, " quit: ", iter->second.Name);
 
             Players.erase(iter);
         }
         else
         {
-            LOG(WARNING) << "Player " << (int)pid << " removed twice!";
+            Logger.Warning("Player ", (int)pid, " removed twice!");
         }
     });
     client->Router.Set<S2CPlayerUpdatePositionT>(S2CPositionUpdateID, [this](playerid_t pid, u16 timestamp, PlayerPosition position)
@@ -62,11 +65,11 @@ void MyClient::OnConnect(SphynxClient* client)
             player.Position = position;
             player.OneWayDelay = delayMsec;
 
-            LOG(INFO) << "Player '" << player.Name << "'(" << (int)pid << ") got position update with one-way-delay=" << delayMsec;
+            Logger.Info("Player '", player.Name, "'(", (int)pid, ") got position update with one-way-delay=", delayMsec);
         }
         else
         {
-            LOG(WARNING) << "Player " << (int)pid << " was not found to update position!";
+            Logger.Warning("Player ", (int)pid, " was not found to update position!");
         }
     });
 
@@ -84,7 +87,7 @@ void MyClient::OnTick(SphynxClient* client, u64 nowMsec)
 
 void MyClient::OnDisconnect(SphynxClient* client)
 {
-    LOG(INFO) << "Disconnect";
+    Logger.Info("Disconnect");
 }
 
 
@@ -98,15 +101,14 @@ void StartSphynxClient()
 {
     SetThreadName("Main");
 
-    StartLogging();
-
-    LOG(INFO) << "UDPClient starting";
+    Logger.Info("UDPClient starting");
 
     m_myclient = new MyClient;
     m_client = new SphynxClient;
 
     auto settings = std::make_shared<ClientSettings>();
-    settings->Host = "slycog.com";
+    //settings->Host = "slycog.com";
+    settings->Host = "127.0.0.1";
     settings->TCPPort = 5060;
     settings->Interface = m_myclient;
 
@@ -118,13 +120,8 @@ void StopSphynxClient()
     if (!m_client)
         return;
 
-    // FIXME: hacky sleeps
     m_client->Stop();
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    delete m_client;
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    delete m_myclient;
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    StopLogging();
+    delete m_client;
+    delete m_myclient;
 }

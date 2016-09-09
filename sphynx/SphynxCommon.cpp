@@ -1,5 +1,7 @@
 #include "SphynxCommon.h"
 
+static logging::Channel Logger("SphynxCommon");
+
 
 //-----------------------------------------------------------------------------
 // WindowedTimes
@@ -35,7 +37,7 @@ void WindowedTimes::Insert(u64 remoteSendMsec, u64 localRecvMsec)
         static_assert(kWinCount == 2, "Need to change index update code");
         RingWriteIndex ^= 1;
 
-        LOG(DBUG) << "Advanced to next time window index=" << RingWriteIndex;
+        Logger.Debug("Advanced to next time window index=", RingWriteIndex);
 
         sample = BestRing + RingWriteIndex;
         sample->FirstMsec = localRecvMsec;
@@ -91,7 +93,7 @@ bool IgnoreUnreachable(std::shared_ptr<asio::ip::udp::socket>& s, bool ignore)
 
     if (ioctlsocket(s->native_handle(), SIO_UDP_CONNRESET, &behavior) == SOCKET_ERROR)
     {
-        LOG(WARNING) << "IgnoreUnreachable::ioctlsocket() failed: " << ::WSAGetLastError();
+        Logger.Warning("IgnoreUnreachable::ioctlsocket() failed: ", ::WSAGetLastError());
         DEBUG_BREAK;
         return false;
     }
@@ -110,7 +112,7 @@ bool DontFragment(std::shared_ptr<asio::ip::udp::socket>& s, bool df)
     // Useful to measure MTU
     if (setsockopt(s->native_handle(), IPPROTO_IP, IP_DONTFRAGMENT, (const char *)&behavior, sizeof(behavior)))
     {
-        LOG(WARNING) << "IgnoreUnreachable::ioctlsocket() failed: " << ::WSAGetLastError();
+        Logger.Warning("IgnoreUnreachable::ioctlsocket() failed: ", ::WSAGetLastError());
         DEBUG_BREAK;
         return false;
     }
@@ -206,10 +208,10 @@ SphynxPeer::SphynxPeer()
 	IsFullConnection = false;
 	Disconnected = false;
 
-    UDPOutBufferSize = kPackingBufferSizeBytes;
+    UDPOutBufferSize = kUDPPackingBufferSizeBytes;
     UDPOutBuffer = std::make_unique<u8[]>(UDPOutBufferSize);
 
-    TCPOutBufferSize = kPackingBufferSizeBytes;
+    TCPOutBufferSize = kTCPPackingBufferSizeBytes;
     TCPOutBuffer = std::make_unique<u8[]>(TCPOutBufferSize);
 
     DecompressedBufferSize = ZBUFF_recommendedDOutSize();
@@ -247,10 +249,12 @@ void SphynxPeer::Start(std::shared_ptr<asio::io_context>& context)
 
 void SphynxPeer::Stop()
 {
-	LOG(DBUG) << "Stopping TCP connection";
+    Logger.Debug("Stopping TCP connection");
 
-	TCPSocket->close();
-	TCPSocket = nullptr;
+    if (TCPSocket)
+    {
+        TCPSocket->close();
+    }
 }
 
 void SphynxPeer::SendUDP(const u8* data, int bytes)
@@ -278,7 +282,7 @@ void SphynxPeer::SendUDP(const u8* data, int bytes)
 
 void SphynxPeer::OnUDPSendError(const asio::error_code& error)
 {
-    LOG(WARNING) << "UDP send error: " << error.message();
+    Logger.Warning("UDP send error: ", error.message());
 }
 
 void SphynxPeer::OnTCPRead(Stream& wholePacket)
@@ -295,13 +299,13 @@ void SphynxPeer::OnTCPRead(Stream& wholePacket)
 
         if (ZBUFF_isError(zr))
         {
-            LOG(WARNING) << "Invalid compressed data, err=" << ZSTD_getErrorName(zr) << " #" << zr;
+            Logger.Warning("Invalid compressed data, err=", ZSTD_getErrorName(zr), " #", zr);
             Disconnect();
             DEBUG_BREAK; return;
         }
         if (zr != 0 || destsz <= 0)
         {
-            LOG(WARNING) << "Invalid compressed data, zr=" << zr << ", destsz=" << destsz;
+            Logger.Warning("Invalid compressed data, zr=", zr, ", destsz=", destsz);
             Disconnect();
             DEBUG_BREAK; return;
         }
@@ -319,6 +323,12 @@ void SphynxPeer::OnTCPRead(Stream& wholePacket)
 
 void SphynxPeer::PackTCP(Stream& stream)
 {
+    if (stream.GetUsed() > TCPOutBufferSize)
+    {
+        Logger.Warning("Dropped outgoing TCP packet that was too long");
+        DEBUG_BREAK; return;
+    }
+
 	Locker locker(TCPFlushLock);
 	if (TCPOutUsed + stream.GetUsed() > TCPOutBufferSize)
 	{
@@ -331,7 +341,13 @@ void SphynxPeer::PackTCP(Stream& stream)
 
 void SphynxPeer::PackUDP(Stream& stream)
 {
-	Locker locker(UDPFlushLock);
+    if (stream.GetUsed() > UDPOutBufferSize)
+    {
+        Logger.Warning("Dropped outgoing UDP packet that was too long");
+        DEBUG_BREAK; return;
+    }
+
+    Locker locker(UDPFlushLock);
 	if (UDPOutUsed + stream.GetUsed() > UDPOutBufferSize)
 		FlushUDP();
 	memcpy(&UDPOutBuffer[0] + UDPOutUsed, stream.GetFront(), stream.GetUsed());
@@ -377,7 +393,7 @@ void SphynxPeer::FlushTCP()
 
 		if (destlen < 0 || ZBUFF_isError(cr) || used <= 0 || used > bytes)
 		{
-            LOG(WARNING) << "Invalid send compressed data, err=" << ZSTD_getErrorName(cr) << " #" << cr;
+            Logger.Warning("Invalid send compressed data, err=", ZSTD_getErrorName(cr), " #", cr);
 			DEBUG_BREAK; return;
 		}
 
@@ -385,7 +401,7 @@ void SphynxPeer::FlushTCP()
 			break;
         if (destlen != 0)
         {
-            LOG(WARNING) << "Compressor did not use all data but also did not generate output";
+            Logger.Warning("Compressor did not use all data but also did not generate output");
             DEBUG_BREAK; return;
         }
 
@@ -404,7 +420,7 @@ void SphynxPeer::FlushTCP()
 
 		if (ZBUFF_isError(cr))
 		{
-            LOG(WARNING) << "Invalid send end compressed data, err=" << ZSTD_getErrorName(cr) << " #" << cr;
+            Logger.Warning("Invalid send end compressed data, err=", ZSTD_getErrorName(cr), " #", cr);
 			DEBUG_BREAK; return;
 		}
 
@@ -525,62 +541,18 @@ void SphynxPeer::PostNextTCPRead()
 
 void SphynxPeer::OnTCPReadError(const asio::error_code& error)
 {
-    LOG(WARNING) << "TCP read error: ", error.message();
+    Logger.Warning("TCP read error: ", error.message());
 	Disconnect();
 }
 
 void SphynxPeer::OnTCPSendError(const asio::error_code& error)
 {
-    LOG(WARNING) << "TCP send error: ", error.message();
+    Logger.Warning("TCP send error: ", error.message());
 	Disconnect();
 }
 
 void SphynxPeer::OnTCPClose()
 {
-	LOG(INFO) << "TCP close";
+    Logger.Info("TCP close");
 	Disconnect();
-}
-
-
-//-----------------------------------------------------------------------------
-// Logging
-
-#ifdef ANDROID
-    #include <android/log.h>
-    #define LOG_TAG "sphynx"
-#else
-    #include <iostream>
-#endif
-
-struct CustomSink
-{
-    void log(g3::LogMessageMover message)
-    {
-        std::string str = message.get().toString();
-#ifdef ANDROID
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "%s", str.c_str());
-#else
-        std::cout << str;
-#endif
-#ifdef _WIN32
-        ::OutputDebugStringA(str.c_str());
-#endif
-    }
-};
-
-std::unique_ptr<g3::LogWorker> m_logworker;
-
-void StartLogging()
-{
-    // Setup logging
-    m_logworker = g3::LogWorker::createLogWorker();
-    //logworker->addDefaultLogger("client", "");
-    auto sinkHandle = m_logworker->addSink(std::make_unique<CustomSink>(),
-        &CustomSink::log);
-    g3::initializeLogging(m_logworker.get());
-}
-
-void StopLogging()
-{
-    m_logworker.reset();
 }

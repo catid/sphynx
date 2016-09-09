@@ -2,6 +2,8 @@
 #include "DemoProtocol.h"
 #include <iostream>
 
+static logging::Channel Logger("MyServer");
+
 // FIXME: This needs to support multiple arenas of up to 256 players since we have
 // a limited number of Ids to give out.
 
@@ -176,7 +178,7 @@ struct MyServer : ServerInterface
         {
             if (connection != excluded)
             {
-                LOG(DBUG) << "Broadcasting from " << (int)excluded->Id << " to " << (int)connection->Id;
+                Logger.Debug("Broadcasting from ", (int)excluded->Id, " to ", (int)connection->Id);
 
                 (connection->*pFunction)(args...);
             }
@@ -226,10 +228,10 @@ void MyConnection::OnConnect(Connection* connection)
 {
     if (!Server->Pids.Acquire(Id))
     {
-        LOG(WARNING) << "FIXME: Too many players not handled";
+        Logger.Warning("FIXME: Too many players not handled");
     }
 
-    LOG(INFO) << (int)Id << ": Connect";
+    Logger.Info((int)Id, ": Connect");
 
     TCPSetPlayerId.CallSender = connection->TCPCallSender;
     TCPAddPlayer.CallSender = connection->TCPCallSender;
@@ -238,7 +240,7 @@ void MyConnection::OnConnect(Connection* connection)
 
     connection->Router.Set<C2SLoginT>(C2SLoginID, [connection, this](std::string name)
     {
-        LOG(INFO) << (int)Id << ": User login '" << name << "'";
+        Logger.Info((int)Id, ": User login '", name, "'");
 
         {
             Locker locker(PlayerDataLock);
@@ -264,7 +266,7 @@ void MyConnection::OnConnect(Connection* connection)
             Locker locker(PlayerDataLock);
             if (!PositionData.HasPosition)
             {
-                LOG(INFO) << (int)Id << ": Received player position for the first time";
+                Logger.Info((int)Id, ": Received player position for the first time");
                 PositionData.HasPosition = true;
             }
 
@@ -277,7 +279,7 @@ void MyConnection::OnConnect(Connection* connection)
             PositionData.PositionTimestamp15 = timestamp;
             PositionData.PositionMsec = localSentTimeMsec;
 
-            LOG(INFO) << (int)Id << ": Received player position with one-way-delay=" << delayMsec;
+            Logger.Info((int)Id, ": Received player position with one-way-delay=", delayMsec);
 
             this->Server->BroadcastTracker.Update(this, position.x, position.y);
         });
@@ -323,7 +325,7 @@ void MyConnection::OnTick(Connection* connection, u64 nowMsec)
 
 void MyConnection::OnDisconnect(Connection* connection)
 {
-    LOG(INFO) << (int)Id << ": Disconnected";
+    Logger.Info((int)Id, ": Disconnected");
 
     Server->OnDisconnect(Id, this);
 }
@@ -332,11 +334,9 @@ void MyConnection::OnDisconnect(Connection* connection)
 
 int main()
 {
-    StartLogging();
-
     SetThreadName("Main");
 
-    LOG(INFO) << "UDPServer starting";
+    Logger.Info("UDPServer starting");
 
     MyServer myserver;
 
@@ -354,10 +354,6 @@ int main()
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     server.Stop();
-
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-
-    StopLogging();
 
     return 0;
 }

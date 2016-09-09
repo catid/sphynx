@@ -1,5 +1,7 @@
 #include "SphynxServer.h"
 
+static logging::Channel Logger("SphynxServer");
+
 
 //-----------------------------------------------------------------------------
 // Tools
@@ -92,7 +94,7 @@ void ServerWorker::Start(std::shared_ptr<asio::io_context>& context, unsigned th
     ThreadId = threadId;
     Settings = settings;
 
-    LOG(DBUG) << "Thread " << ThreadId << ": Starting";
+    Logger.Debug("Thread ", ThreadId, ": Starting");
 
     Timer = std::make_unique<asio::steady_timer>(*Context);
     PostNextTimer();
@@ -117,13 +119,13 @@ void ServerWorker::Loop()
 {
     SetThreadName("ServerWorker");
 
-    LOG(INFO) << "Thread " << ThreadId << ": Entering loop";
+    Logger.Info("Thread ", ThreadId, ": Entering loop");
 
     if (ThreadId < std::thread::hardware_concurrency())
     {
         if (!SetCurrentThreadAffinity(ThreadId))
         {
-            LOG(WARNING) << "Thread " << ThreadId << ": Unable to set affinity";
+            Logger.Warning("Thread ", ThreadId, ": Unable to set affinity");
             DEBUG_BREAK;
         }
     }
@@ -131,7 +133,7 @@ void ServerWorker::Loop()
     while (!Terminated)
         Context->run();
 
-    LOG(INFO) << "Thread " << ThreadId << ": Exiting loop";
+    Logger.Info("Thread ", ThreadId, ": Exiting loop");
 }
 
 void ServerWorker::PromoteNewConnections()
@@ -152,7 +154,7 @@ void ServerWorker::OnTimerTick()
 {
     u64 nowMsec = GetTimeMsec();
 
-    //LOG(DBUG) << "Thread " << ThreadId << ": Tick " << nowMsec;
+    Logger.Trace("Thread ", ThreadId, ": Tick ", nowMsec);
 
     PromoteNewConnections();
 
@@ -167,19 +169,28 @@ void ServerWorker::OnTimerTick()
 
 void ServerWorker::OnTimerError(const asio::error_code& error)
 {
-    LOG(WARNING) << "Thread " << ThreadId << ": Tick error " << error.message();
+    Logger.Warning("Thread ", ThreadId, ": Tick error ", error.message());
 }
 
 void ServerWorker::Stop()
 {
-    LOG(DBUG) << "Thread " << ThreadId << ": Stopping";
+    Logger.Debug("Thread ", ThreadId, ": Stopping");
 
     Terminated = true;
 
     if (Timer)
         Timer->cancel();
     if (Thread)
-        Thread->join();
+    {
+        try
+        {
+            Thread->join();
+        }
+        catch (std::system_error& err)
+        {
+            Logger.Warning("Exception while joining thread: ", err.what());
+        }
+    }
     Thread = nullptr;
     Context = nullptr;
     Timer = nullptr;
@@ -209,7 +220,7 @@ void ServerWorkers::Start(std::shared_ptr<asio::io_context>& context, std::share
         settings->WorkerCount = num_cpus;
     }
 
-    LOG(INFO) << "Starting " << Settings->WorkerCount << " workers";
+    Logger.Info("Starting ", Settings->WorkerCount, " workers");
 
     Context = context;
 
@@ -238,7 +249,7 @@ ServerWorker* ServerWorkers::FindLaziestWorker()
 
 void ServerWorkers::Stop()
 {
-    LOG(INFO) << "Stopping " << Settings->WorkerCount << " workers";
+    Logger.Info("Stopping ", Settings->WorkerCount, " workers");
 
     u64 t0 = GetTimeMsec();
     for (auto& worker : Workers)
@@ -246,7 +257,7 @@ void ServerWorkers::Stop()
     Workers.clear();
     u64 t1 = GetTimeMsec();
 
-    LOG(INFO) << "Stopped " << Settings->WorkerCount << " workers in " << (t1 - t0) / 1000 << " msec";
+    Logger.Info("Stopped ", Settings->WorkerCount, " workers in ", (t1 - t0) / 1000, " msec");
 
     Context = nullptr;
 }
@@ -266,7 +277,7 @@ Connection::Connection()
         u64 nowMsec = GetTimeMsec();
         u64 sentTimeFullMsec = ReconstructMsec(nowMsec, sentTimeMsec);
 
-        LOG(DBUG) << "Got heartbeat from " << (int)(nowMsec - sentTimeFullMsec);
+        Logger.Debug("Got heartbeat from ", (int)(nowMsec - sentTimeFullMsec));
 
         // Client is keeping connection alive
     });
@@ -294,7 +305,7 @@ void Connection::OnWorkerStart()
 {
     Cipher.InitializeEncryption(0, EncryptionRole::Server);
 
-    LOG(INFO) << "Worker starting on connection. Sending TCP handshake";
+    Logger.Info("Worker starting on connection. Sending TCP handshake");
 
     RPCTCPHandshake(ConnectionCookie, UDPPort);
 
@@ -308,7 +319,7 @@ void Connection::OnUDPHandshake(asio::ip::udp::endpoint& from, std::shared_ptr<a
 
 	IsFullConnection = true;
 
-    LOG(INFO) << "Connection got UDP handshake from client: Session established!";
+    Logger.Info("Connection got UDP handshake from client: Session established!");
 
     Interface->OnConnect(this);
 }
@@ -317,7 +328,7 @@ bool Connection::OnTick(u64 nowMsec)
 {
     if (nowMsec - LastReceiveLocalMsec > kS2CTimeoutMsec && LastReceiveLocalMsec != 0)
     {
-        LOG(WARNING) << "Client timeout: Disconnecting";
+        Logger.Warning("Client timeout: Disconnecting");
 
         Disconnect();
     }
@@ -327,7 +338,7 @@ bool Connection::OnTick(u64 nowMsec)
 
     if (IsDisconnected())
     {
-        LOG(WARNING) << "Client is disconnected: Removing from worker list";
+        Logger.Warning("Client is disconnected: Removing from worker list");
 
         if (IsFullConnection)
             Interface->OnDisconnect(this);
@@ -341,7 +352,7 @@ bool Connection::OnTick(u64 nowMsec)
     if (IsFullConnection && nowMsec - LastUDPTimeSyncMsec > static_cast<u64>(S2CUDPTimeSyncIntervalMsec))
     {
         LastUDPTimeSyncMsec = nowMsec;
-        LOG(DBUG) << "Sending UDP timesync " << nowMsec;
+        Logger.Debug("Sending UDP timesync ", nowMsec);
 
         u16 bestDelta = static_cast<u16>(WinTimes.ComputeDelta(nowMsec));
         RPCTimeSyncUDP(bestDelta);
@@ -357,7 +368,7 @@ bool Connection::OnTick(u64 nowMsec)
     if (nowMsec - LastTCPHeartbeatMsec > kS2CTCPHeartbeatIntervalMsec)
     {
         LastTCPHeartbeatMsec = nowMsec;
-        LOG(DBUG) << "Sending TCP heartbeat " << nowMsec;
+        Logger.Debug("Sending TCP heartbeat ", nowMsec);
 
         RPCHeartbeatTCP();
     }
@@ -390,7 +401,7 @@ void UDPServer::Start(std::shared_ptr<asio::io_context>& context, unsigned short
     Workers = workers;
     SelfRef = selfRef;
 
-    LOG(INFO) << "UDP " << Port << ": Starting server";
+    Logger.Info("UDP ", Port, ": Starting server");
 
     asio::ip::udp::endpoint UDPEndpoint(asio::ip::udp::v4(), port);
     UDPSocket = std::make_shared<asio::ip::udp::socket>(*Context, UDPEndpoint);
@@ -413,7 +424,7 @@ void UDPServer::Start(std::shared_ptr<asio::io_context>& context, unsigned short
         std::shared_ptr<Connection> connection;
         if (PreMapFindRemove(cookie, connection))
         {
-            LOG(INFO) << "Got UDP data from the client";
+            Logger.Info("Got UDP data from the client");
 
             connection->OnUDPHandshake(FromEndpoint, UDPSocket);
 
@@ -447,12 +458,12 @@ void UDPServer::HandlePreConnectData(Stream& rawStream)
 
 void UDPServer::OnUDPClose()
 {
-    LOG(WARNING) << "UDP " << Port << ": Closed";
+    Logger.Warning("UDP ", Port, ": Closed");
 }
 
 void UDPServer::OnUDPError(const asio::error_code& error)
 {
-    LOG(WARNING) << "UDP " << Port << ": Socket error: " << error.message();
+    Logger.Warning("UDP ", Port, ": Socket error: ", error.message());
 }
 
 void UDPServer::PostNextRecvFrom()
@@ -473,7 +484,7 @@ void UDPServer::PostNextRecvFrom()
             Stream stream;
             stream.WrapRead(&UDPReceiveBuffer[0], bytes_transferred);
 
-            //LOG(DBUG) << "UDP " << Port << ": Got data len=" << stream.GetRemaining();
+            Logger.Trace("UDP ", Port, ": Got data len=", stream.GetRemaining());
 
             std::shared_ptr<Connection> connection;
             if (MapFind(FromEndpoint, connection))
@@ -601,7 +612,7 @@ void UDPServer::PreMapClear()
 
 void UDPServer::Stop()
 {
-    LOG(DBUG) << "UDP " << Port << ": Stopping";
+    Logger.Debug("UDP ", Port, ": Stopping");
 
     MapClear();
     PreMapClear();
@@ -631,7 +642,7 @@ void Server::Start(std::shared_ptr<ServerSettings>& settings)
 {
     Settings = settings;
 
-    LOG(INFO) << "Starting server on TCP port " << Settings->MainTCPPort << " and UDP ports " << Settings->StartUDPPort << " - " << Settings->StopUDPPort;
+    Logger.Info("Starting server on TCP port ", Settings->MainTCPPort, " and UDP ports ", Settings->StartUDPPort, " - ", Settings->StopUDPPort);
 
     KeyGen.Initialize((u32)GetTimeUsec());
 
@@ -674,7 +685,7 @@ void Server::Start(std::shared_ptr<ServerSettings>& settings)
 void Server::OnAccept(const std::shared_ptr<Connection>& connection)
 {
     auto& addr = connection->PeerTCPAddress;
-    LOG(INFO) << "Accepted a TCP connection from " << addr.address().to_string() << " : " << addr.port();
+    Logger.Info("Accepted a TCP connection from ", addr.address().to_string(), " : ", addr.port());
 
     const u32 cookie = KeyGen.Next();
 
@@ -707,7 +718,7 @@ UDPServer* Server::FindLaziestUDPServer()
 
 void Server::OnAcceptError(const asio::error_code& error)
 {
-    LOG(WARNING) << "TCP acceptor socket error: ", error.message();
+    Logger.Warning("TCP acceptor socket error: ", error.message());
 }
 
 void Server::PostNewAccept()
@@ -727,7 +738,7 @@ void Server::PostNewAccept()
 
 void Server::Stop()
 {
-    LOG(INFO) << "Stopping server";
+    Logger.Info("Stopping server");
 
     if (Context)
         Context->stop();

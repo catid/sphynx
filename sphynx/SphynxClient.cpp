@@ -1,5 +1,11 @@
 #include "SphynxClient.h"
 
+static logging::Channel Logger("SphynxClient");
+
+
+//-----------------------------------------------------------------------------
+// SphynxClient
+
 SphynxClient::SphynxClient()
 {
     ServerTimeDeltaMsec = 0;
@@ -11,7 +17,7 @@ SphynxClient::SphynxClient()
 
     Router.Set<S2CTCPHandshakeT>(S2CTCPHandshakeID, [this](u32 cookie, u16 udpPort)
     {
-        LOG(INFO) << "Got TCP handshake: cookie=" << cookie << ", UDPport=" << udpPort;
+        Logger.Info("Got TCP handshake: cookie=", cookie, ", UDPport=", udpPort);
 
         ConnectionCookie = cookie;
         PeerUDPAddress = asio::ip::udp::endpoint(ServerTCPAddr.address(), udpPort);
@@ -47,11 +53,11 @@ SphynxClient::SphynxClient()
         const u64 bestS2Cdelta = WinTimes.ComputeDelta(nowMsec);
         ServerTimeDeltaMsec = (bestC2Sdelta - (u16)bestS2Cdelta) >> 1;
 
-        LOG(INFO) << "Got time sync: bestC2Sdelta=" << bestC2Sdelta << ", delta=" << ServerTimeDeltaMsec;
+        Logger.Info("Got time sync: bestC2Sdelta=", bestC2Sdelta, ", delta=", ServerTimeDeltaMsec);
     });
     Router.Set<S2CHeartbeatT>(S2CHeartbeatID, [this]()
     {
-        LOG(INFO) << "Got heartbeat";
+        Logger.Info("Got heartbeat");
 
         // no-op
     });
@@ -76,7 +82,7 @@ void SphynxClient::OnTimerTick()
     {
         if (nowMsec - LastReceiveLocalMsec > kS2CTimeoutMsec && LastReceiveLocalMsec != 0)
         {
-            LOG(WARNING) << "Server timeout: Disconnecting";
+            Logger.Warning("Server timeout: Disconnecting");
 
             Disconnect();
         }
@@ -86,7 +92,7 @@ void SphynxClient::OnTimerTick()
 
         if (IsDisconnected())
         {
-            LOG(WARNING) << "Server is disconnected: Stopping now";
+            Logger.Warning("Server is disconnected: Stopping now");
 
             if (IsFullConnection)
                 Interface->OnDisconnect(this);
@@ -101,7 +107,7 @@ void SphynxClient::OnTimerTick()
             (nowMsec - LastUDPTimeSyncMsec > static_cast<u64>(S2CUDPTimeSyncIntervalMsec)))
         {
             LastUDPTimeSyncMsec = nowMsec;
-            LOG(DBUG) << "Sending UDP heartbeat " << nowMsec;
+            Logger.Trace("Sending UDP heartbeat ", nowMsec);
 
             RPCHeartbeatUDP(ToServerTime15(nowMsec));
 
@@ -116,7 +122,7 @@ void SphynxClient::OnTimerTick()
         if (nowMsec - LastTCPHeartbeatMsec > static_cast<u64>(kS2CTCPHeartbeatIntervalMsec))
         {
             LastTCPHeartbeatMsec = nowMsec;
-            LOG(DBUG) << "Sending TCP heartbeat " << nowMsec;
+            Logger.Trace("Sending TCP heartbeat ", nowMsec);
 
             RPCHeartbeatTCP(ToServerTime15(nowMsec));
         }
@@ -129,7 +135,7 @@ void SphynxClient::OnTimerTick()
 
 void SphynxClient::OnTimerError(const asio::error_code& error)
 {
-    LOG(WARNING) << "Client timer thread: Tick error " << error.message();
+    Logger.Warning("Client timer thread: Tick error ", error.message());
 }
 
 void SphynxClient::PostNextTimer()
@@ -170,22 +176,22 @@ void SphynxClient::Loop()
         }
     });
 
-    LOG(INFO) << "Client thread: Entering loop";
+    Logger.Info("Client thread: Entering loop");
 
     while (!Terminated)
         Context->run();
 
-    LOG(INFO) << "Client thread: Exiting loop";
+    Logger.Info("Client thread: Exiting loop");
 }
 
 void SphynxClient::OnUDPClose()
 {
-	LOG(WARNING) << "UDP: Closed";
+    Logger.Warning("UDP: Closed");
 }
 
 void SphynxClient::OnUDPError(const asio::error_code& error)
 {
-    LOG(WARNING) << "UDP: Socket error: " << error.message();
+    Logger.Warning("UDP: Socket error: ", error.message());
 }
 
 void SphynxClient::PostNextRecvFrom()
@@ -206,7 +212,7 @@ void SphynxClient::PostNextRecvFrom()
 			Stream stream;
             stream.WrapRead(&UDPReceiveBuffer[0], bytes_transferred);
 
-			//LOG(DBUG) << "UDP: Got data len=" << stream.GetRemaining();
+			Logger.Trace("UDP: Got data len=", stream.GetRemaining());
 
 			OnUDPData(nowMsec, stream);
 
@@ -220,7 +226,7 @@ void SphynxClient::Start(const std::shared_ptr<ClientSettings>& settings)
     Settings = settings;
     Interface = Settings->Interface;
 
-    LOG(INFO) << "Starting client for host=" << Settings->Host << " : " << Settings->TCPPort;
+    Logger.Info("Starting client for host=", Settings->Host, " : ", Settings->TCPPort);
 
     IsFullConnection = false;
     Disconnected = false;
@@ -251,7 +257,7 @@ void SphynxClient::Start(const std::shared_ptr<ClientSettings>& settings)
 
 void SphynxClient::OnResolveError(const asio::error_code& error)
 {
-    LOG(WARNING) << "Resolve error: " << error.message();
+    Logger.Warning("Resolve error: ", error.message());
     Interface->OnConnectFail(this);
 }
 
@@ -263,7 +269,7 @@ void SphynxClient::PostNextConnect()
 
     const asio::ip::tcp::endpoint& addr = ServerAddrs[ConnectAddrIndex];
 
-    LOG(INFO) << "Attempting connection to " << addr.address().to_string() << " : " << addr.port();
+    Logger.Info("Attempting connection to ", addr.address().to_string(), " : ", addr.port());
 
     TCPSocket->async_connect(addr, [this, addr](const asio::error_code& error)
     {
@@ -271,7 +277,7 @@ void SphynxClient::PostNextConnect()
         {
             if (ConnectAddrIndex == ConnectAddrEnd)
             {
-                LOG(INFO) << "All connection attempts failed";
+                Logger.Info("All connection attempts failed");
                 Interface->OnConnectFail(this);
             }
             else
@@ -287,7 +293,7 @@ void SphynxClient::PostNextConnect()
 
 void SphynxClient::OnConnect()
 {
-    LOG(INFO) << "Connection success";
+    Logger.Info("Connection success");
 
     Timer = std::make_unique<asio::steady_timer>(*Context);
     PostNextTimer();
@@ -297,7 +303,7 @@ void SphynxClient::OnConnect()
 
 void SphynxClient::Stop()
 {
-    LOG(DBUG) << "Stopping client";
+    Logger.Debug("Stopping client");
 
     Terminated = true;
 
@@ -306,7 +312,16 @@ void SphynxClient::Stop()
     if (Timer)
         Timer->cancel();
     if (Thread)
-        Thread->join();
+    {
+        try
+        {
+            Thread->join();
+        }
+        catch (std::system_error& err)
+        {
+            Logger.Warning("Exception while joining thread: ", err.what());
+        }
+    }
     Thread = nullptr;
     Context = nullptr;
     Timer = nullptr;
